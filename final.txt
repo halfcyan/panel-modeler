@@ -1,0 +1,98 @@
+Title
+    Photovoltaic Decay Modeling through PVWatts
+    Author: Cypress Reed
+    CSCI200, Section D
+
+PROBLEM DESCRIPTION:
+    I created a program that predicts future power output of a solar panel based on its specifications for power output, temperature derating
+        coefficient, and decay rate. Given a location's average irradiance and temperature over a year, I will give its expected power output a given number of
+        years into the future. There will be no direct user interaction; instead, the program will require two command line arguments: the location of a file to
+        read information from and the location of a file to output to. Both will be in CSV format so they can be read by Excel or a similar application. The
+        input file will contain the required input specifications and the output file will be a number of rows equivalent to the number of years into the future
+        and will have the expected power output at each year over that timeframe for each panel.
+
+PROGRAM DOCUMENTATION:
+    The program takes in a csv file with the following format:
+        1. Reference power as a decimal
+        2. Average irradiance in watts per square meter as a decimal
+        3. Average temperature in degrees Celsius as a decimal
+        4. Temperature Derating Coefficient of Power as a decimal
+        5. Decay rate per year of your panel as a decimal
+    It then outputs a csv file with a row for each year and a column for each panel, matching the rows of input. The output also shows the year number for each
+        row. The output file can be read by Excel or a similar application to create graphs.
+
+    The expected power output is calculated using the following formula:
+        P = P_ref * (1 + T * T_derate) * (1 - decay_rate) ^ years
+    Where P is the expected power output, P_ref is the reference power, T is the average temperature, T_derate is the temperature derating coefficient,
+        decay_rate is the decay rate per year, and years is the number of years into the future. This is the standard PVWatts formula combined with an
+        exponential decay rate formula. There are more complicated decay formulae that are more accurate, but this approximation is close enough for this
+        project and much easier to implement.
+
+    I would have loved to implement a graphing feature where a user could input the specifications of a panel and see a graph of its expected power output over
+        time, but I thought it was beyond the scope of this project and I wanted to focus on getting the core functionality working first. I would have liked to
+        allow users to simply input a location to pull irradiance and temperature data, but that requires internet access, and I didn't feel comfortable
+        implementing that feature in this case. I also don't have the knowledge of how to do that in C++.
+
+    The simulation class is separate from the equation class on purpose. This way, the simulation class can be extended in the future to have more simulations,
+        and the necessary equations could just be within the equation class. The simulation class uses the equation class, but it is more complex.
+
+    FileIO and IOProcessor work together fairly closely, but I wanted to handle the file streams separate from the data processing.
+
+    main.cpp includes a error handling and user interaction. It has a help function that allows users to see how to actually format the csv for this program. I
+        wanted to do this because there could come a time when someone else wants to use this program where I am not controlling how they implement it.
+
+    Eventually, I will likely edit this program to be less specific to this class. I'll edit the makefile targets and that type of thing so that users can just
+        run make to build and not worry about submissions and that kind of thing. I'll likely publish that on GitHub at some point (https://github.com/halfcyan).
+
+    Differences from the proposal:
+        I didn't end up using the StandardFunctions library I've built because it's mostly for user inputs and I didn't use that in this project. I did everything
+            at the command line.
+
+        I didn't add the number of years to the PanelData struct because I realized it's more realistic to just have the number of years to be the same for all
+            panels. It also made implementation easier because I could construct the 2D array easier.
+
+        The Equation class is very different from in the proposal. It only has static member functions that are used in the simulation class. Each panel will
+            only use the equation class once, where the simulation class will use it multiple times, so I didn't want to construct objects for each panel.
+            Standard test conditions are also built into the code at compile-time (constexpr) because there are so few instances where someone is using a
+            different set of conditions that it didn't make sense to have them as variables.
+
+        The IOProcessor class has more functions than in the proposal because I ended up needing helper functions I wasn't anticipating or didn't think of.
+CLASS DESCRIPTION:
+    I created a few custom classes.
+    The most complex one is IOProcessor. It has functions for reading and writing csv files, as well as some helper functions for parsing strings and
+        formatting output. It cleans up the main function and allows for easier reading and writing of files.
+    The FileIO class is a simple wrapper around file streams that allows for easier reading and writing of files.
+    The Simulation class runs the equations that calculate the expected power output for each panel over the specified number of years.
+    The Equation class has static member functions that implement the equations for calculating expected power output based on the PVWatts formula and the
+        decay formula.
+    The PanelData struct is a simple struct that holds the specifications for each panel.
+LIST DATA STRUCTURE:
+    I used a couple of list structures. I used a single array of PanelData structs to hold the specifications for each panel. I also used a 2D array of doubles
+        to hold the expected power output for each panel over the specified number of years. The 2D array is indexed by year and panel number, so it is easy to
+        access the expected power output for any given year and panel, which is critical for the output file.
+    I prefer to use arrays when I can because they are more efficient than vectors and I know the size of the data ahead of time, in this case at runtime.
+FILE I/O:
+    I used File I/O to read in the input file and write the output file. I thought it was necessary because users can make small edits to files without having
+        to input every parameter again by hand. The output is also easier to read and can be easily graphed in Excel or a similar application.
+PROJECT MODIFICATIONS:
+    Copying this from the program documentation:
+    I didn't end up using the StandardFunctions library I've built because it's mostly for user inputs and I didn't use that in this project. I did everything
+        at the command line.
+
+    I didn't add the number of years to the PanelData struct because I realized it's more realistic to just have the number of years to be the same for all
+        panels. It also made implementation easier because I could construct the 2D array easier.
+
+    The Equation class is very different from in the proposal. It only has static member functions that are used in the simulation class. Each panel will
+        only use the equation class once, where the simulation class will use it multiple times, so I didn't want to construct objects for each panel.
+        Standard test conditions are also built into the code at compile-time (constexpr) because there are so few instances where someone is using a
+        different set of conditions that it didn't make sense to have them as variables.
+
+    The IOProcessor class has more functions than in the proposal because I ended up needing helper functions I wasn't anticipating or didn't think of.
+REFLECTIONS:
+    I learned that C++ can be much harder than I expected. I had weird issues with deallocating pointers multiple times (in main.cpp and in a class destructor)
+        that causes the program to throw a weird fault I didn't know how to fix. Getting the csv formatting to work took me the longest amount of time because I
+        couldn't figure out how I wanted to format the output. Through this project, I learned how file input and output can simultaneously make projects
+        esaier and more difficult, I learned how to use command line arguments (I wrote the code for this back in early April, so we hadn't learned that in
+        class yet), and I learned why separating classes that you might want to extend in the future is beneficial. I think in the future, I will think more
+        closely about what I need to do for a project while I'm planning it. My UML diagram looks very different from the final code because I didn't think
+        about where some of the functionality should actually be located.
