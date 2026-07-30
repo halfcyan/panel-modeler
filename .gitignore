@@ -42,6 +42,7 @@
 
 # Meson build directory
 /builddir/
+/build/
 
 .DS_STORE
 copilot.data.migration.ask2agent.xml

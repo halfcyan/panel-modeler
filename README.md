@@ -26,8 +26,10 @@ This produces an executable named `panel-modeler` in `builddir/`. To wipe the bu
 rm -rf builddir
 ```
 
-If you'd rather use a different compiler, omit the native file and set `CXX` at setup time
-(e.g. `CXX=g++ meson setup builddir`).
+Clang and the [mold](https://github.com/rui314/mold) linker are required — `meson.build`
+refuses to configure if the C++ compiler is anything other than Clang or if mold isn't
+installed, so always set up with the native file (or `CXX=clang++`). On macOS/Linux with
+Homebrew: `brew install llvm mold`.
 
 ## Usage
 
