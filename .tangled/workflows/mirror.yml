@@ -1,0 +1,21 @@
+when:
+  - event: ["push"]
+    branch: ["*"]
+  - event: ["push"]
+    tag: ["*"]
+engine: "nixery"
+clone:
+  depth: 0
+  submodules: false
+dependencies:
+  nixpkgs:
+    - git
+    - cacert
+steps:
+  - name: "Mirror branches and tags to GitHub"
+    command: |
+      set -eu
+      : "${GITHUB_TOKEN:?Set the GitHub personal access token as a Tangled secret named GITHUB_TOKEN}"
+      : "${GITHUB_REPOSITORY:?Set the GitHub owner/repository as a Tangled secret named GITHUB_REPOSITORY}"
+      git clone --mirror "$TANGLED_REPO_URL" github-mirror.git
+      git -C github-mirror.git push --mirror "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"

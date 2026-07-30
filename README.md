@@ -278,3 +278,18 @@ The optional infrastructure repository contains a rootless Podman service at
 `spruce-infra/panel-modeler/` that serves a self-hosted database internally at
 `http://panel-modeler-panels/panels.json`. The GUI can use that URL from the Panel
 Database dialog.
+
+## Mirroring to GitHub
+
+Tangled is the source of truth for this repository. The Tangled pipeline at
+[`.tangled/workflows/mirror.yml`](.tangled/workflows/mirror.yml) mirrors every branch
+and tag push to GitHub.
+
+Configure these repository secrets in Tangled:
+
+- `GITHUB_TOKEN`: a GitHub fine-grained personal access token with **Contents: Read and write** permission on the destination repository
+- `GITHUB_REPOSITORY`: the GitHub destination in `owner/repository` form
+
+The workflow uses `git push --mirror`, so the GitHub repository should be dedicated to
+this mirror and should not receive independent changes. The destination must already
+exist on GitHub.
