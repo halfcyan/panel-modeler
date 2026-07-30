@@ -276,8 +276,9 @@ ln -sf builddir/compile_commands.json compile_commands.json
 
 The optional infrastructure repository contains a rootless Podman service at
 `spruce-infra/panel-modeler/` that serves a self-hosted database internally at
-`http://panel-modeler-panels/panels.json`. The GUI can use that URL from the Panel
-Database dialog.
+`http://panel-modeler-panels/panels.json`. The GUI defaults to the public endpoint
+`https://panels.willowidk.dev/panels.json`, while the Panel Database dialog still allows
+the URL to be changed.
 
 ## Mirroring to GitHub
 

@@ -28,7 +28,10 @@ namespace panel_modeler {
         m_sourceCombo->addItem(QStringLiteral("Bundled / installed database"), SOURCE_LOCAL);
         m_sourceCombo->addItem(QStringLiteral("Remote (self-hosted) URL"), SOURCE_REMOTE);
         m_urlEdit->setPlaceholderText(QStringLiteral("https://your-server.example/panels.json"));
-        m_urlEdit->setText(QSettings().value(QStringLiteral("panelDb/remoteUrl")).toString());
+        m_urlEdit->setText(
+            QSettings()
+                .value(QStringLiteral("panelDb/remoteUrl"), QStringLiteral("https://panels.willowidk.dev/panels.json"))
+                .toString());
         m_urlEdit->setEnabled(false);
         m_filterEdit->setPlaceholderText(QStringLiteral("Filter by manufacturer or model..."));
 
