@@ -1,174 +1,280 @@
-# Photovoltaic Decay Modeling through PVWatts
+# panel-modeler
 
-A C++ command-line program that predicts the future power output of solar panels based on their
-specifications (reference power, temperature derating coefficient, and decay rate). Given a
-location's average irradiance and temperature over a year, it calculates the expected power output
-a given number of years into the future.
+`panel-modeler` estimates photovoltaic panel output over time using a PVWatts-style
+calculation and exponential panel degradation. It provides both a CSV command-line
+interface and a Qt 6 desktop GUI.
 
-There is no direct user interaction; the program takes two command-line arguments — an input file
-and an output file, both in CSV format so they can be opened by Excel or a similar application.
-The input file contains the panel specifications, and the output file contains one row per year
-with the expected power output of each panel over that timeframe.
+The GUI can retrieve annual climate values from a location entered as coordinates or
+an address. It also includes a small JSON panel database that can be replaced with a
+self-hosted HTTP copy.
 
-## Building
+## Requirements
 
-This project builds with [Meson](https://mesonbuild.com/) + [Ninja](https://ninja-build.org/) and
-uses Clang by default via the `clang.ini` native file. It targets C++23.
+- C++23 compiler; Clang is required by the Meson configuration
+- Meson 1.0 or newer
+- Ninja
+- `mold` on Linux; macOS uses the system linker because Apple Clang does not accept
+  `-fuse-ld=mold`
+- Qt 6 for the GUI and network features
+
+On macOS with Homebrew:
+
+```sh
+brew install meson ninja qt
+```
+
+Qt is optional at configure time. If it is not available, the CSV CLI and simulation
+core still build. To require or disable Qt explicitly, use `-Dqt=enabled` or
+`-Dqt=disabled`.
+
+## Build
 
 ```sh
 meson setup builddir --native-file clang.ini
 meson compile -C builddir
 ```
 
-This produces an executable named `panel-modeler` in `builddir/`. To wipe the build directory:
+The executables are created at:
+
+```text
+builddir/src/panel-modeler
+builddir/src/panel-modeler-gui
+```
+
+To start over:
 
 ```sh
 rm -rf builddir
+meson setup builddir --native-file clang.ini
 ```
 
-Clang and the [mold](https://github.com/rui314/mold) linker are required — `meson.build`
-refuses to configure if the C++ compiler is anything other than Clang or if mold isn't
-installed, so always set up with the native file (or `CXX=clang++`). On macOS/Linux with
-Homebrew: `brew install llvm mold`.
+## Install
 
-## Usage
+Meson installs both executables, the bundled panel database, and project
+Documentation:
 
 ```sh
-./builddir/panel-modeler inputFile outputFile
+meson install -C builddir
 ```
 
-- `inputFile` — relative path to the input file in CSV format
-- `outputFile` — relative path to the output file
+Use a different prefix during setup if desired:
 
-Run `./builddir/panel-modeler` with no arguments (or `./builddir/panel-modeler help`) to print
-usage and input formatting help.
+```sh
+meson setup builddir --native-file clang.ini --prefix="$HOME/.local"
+meson compile -C builddir
+meson install -C builddir
+```
 
-## Input Format
+The installed layout is approximately:
 
-The first line of the input file is the number of years to simulate (the same for all panels).
-Each subsequent line describes one panel with five comma-separated decimal values, in order:
+```text
+<prefix>/bin/panel-modeler
+<prefix>/bin/panel-modeler-gui
+<prefix>/share/panel-modeler/panels.json
+<prefix>/share/doc/panel-modeler/README.md
+<prefix>/share/doc/panel-modeler/LICENSE
+```
 
-1. Reference power
+To stage an install without modifying the system:
+
+```sh
+DESTDIR=/tmp/panel-modeler-install meson install -C builddir
+```
+
+## GUI
+
+Start the GUI with:
+
+```sh
+./builddir/src/panel-modeler-gui
+```
+
+The GUI supports:
+
+- Address geocoding or direct latitude/longitude entry
+- Climate lookup and editable irradiance/temperature values
+- Adding panels manually or selecting them from the panel database
+- Importing the existing input CSV format
+- Running the simulation with a results table and line chart
+- Exporting results in the same CSV format as the CLI
+
+The GUI uses one location-wide irradiance and temperature value for all panels. When
+importing a CSV whose rows use different climate values, it uses the first row's
+values and reports a warning.
+
+## CLI usage
+
+Run a simulation from an input CSV:
+
+```sh
+./builddir/src/panel-modeler input.csv output.csv
+```
+
+Print help or the version:
+
+```sh
+./builddir/src/panel-modeler --help
+./builddir/src/panel-modeler --version
+```
+
+When Qt is available, look up climate data directly:
+
+```sh
+./builddir/src/panel-modeler --climate 33.44,-112.07
+./builddir/src/panel-modeler --climate "Phoenix, AZ"
+```
+
+The lookup prints a ready-to-edit CSV line. Coordinates use latitude,longitude
+order. Addresses are resolved with OpenStreetMap Nominatim, then climate data is
+retrieved from NASA POWER.
+
+## Input CSV format
+
+The first line is the number of years to simulate. Each following non-empty line has
+five comma-separated values:
+
+1. Reference power in watts
 2. Average irradiance in watts per square meter
 3. Average temperature in degrees Celsius
-4. Temperature derating coefficient of power
-5. Decay rate per year of the panel
+4. Temperature derating coefficient of power, as a decimal per degree Celsius
+5. Decay rate per year, as a decimal
 
-All of these parameters should be available from your solar panel manufacturer. Irradiance and
-temperature data for a location can be gathered with the
-[SAM tool](https://sam.nrel.gov/) from the National Renewable Energy Lab.
-
-Example (`ExamplePanelData.csv`):
+Example: [`tests/ExamplePanelData.csv`](tests/ExamplePanelData.csv)
 
 ```csv
 25
-100.0, 196.07, 13.5, -0.0035, 0.0045
-100.0, 196.07, 13.5, -0.0035, 0.0045
-200.0, 196.07, 13.5, -0.0035, 0.0050
-550.0, 247.94, 24.9, -0.0030, 0.0040
-550.0, 247.94, 24.9, -0.0030, 0.0040
+400.0, 196.07, 13.5, -0.0035, 0.0045
 ```
 
-## Output Format
+The parser limits years to 100, irradiance to 0–2000 W/m², temperature to -50–60 °C,
+temperature derating to -0.05–0.05, and decay to 0–0.10. Values outside those ranges
+are clamped with warnings.
 
-The output CSV has a header row, one column per panel (matching the input rows), and one row per
-year starting at Year 0. It can be read by Excel or a similar application to create graphs.
+## Output and equation
 
-Example (`ExpectedOutputData.csv`, abbreviated):
+Output contains one header row and one row for each year, starting at Year 0. The
+historical formatting is intentionally stable so existing spreadsheets and expected
+output files remain compatible.
 
-```csv
-      Year,   Panel 1,   Panel 2,   Panel 3,   Panel 4,   Panel 5
-    Year 0,   20.3962,   20.3962,   40.7924,  136.4079,  136.4079
-    Year 1,   20.3044,   20.3044,   40.5884,  135.8623,  135.8623
-    ...
-   Year 25,   18.2213,   18.2213,   35.9878,  123.4022,  123.4022
+The estimate is:
+
+```text
+P = P_ref * (I / 1000) * (1 + c_T * (T - 25)) * (1 - d)^years
 ```
 
-## How It Works
+where:
 
-The expected power output is calculated with the formula:
+- `P_ref` is reference panel power
+- `I` is average irradiance in W/m²
+- `T` is average temperature in °C
+- `c_T` is the temperature derating coefficient
+- `d` is the annual decay rate
 
+This is an intentionally simplified model, not a bankable production forecast.
+
+## Network climate data
+
+The network feature uses:
+
+- **NASA POWER climatology API** for `ALLSKY_SFC_SW_DWN` and `T2M`. The API reports
+  irradiance in kWh/m²/day; the application converts its annual value to average W/m².
+  The climatology endpoint represents the 2001–2020 period in the current API response.
+- **OpenStreetMap Nominatim** for address-to-coordinate lookup.
+
+Network requests require internet access. Nominatim has a usage policy and should not
+be treated as a bulk geocoding service. For repeated or production use, configure an
+appropriate geocoding provider or host your own service. The fetched values are
+editable because annual climatology is an approximation and may not match a project's
+preferred weather dataset.
+
+## Panel database
+
+The bundled database is [`data/panels.json`](data/panels.json). Values are nominal
+examples and should be checked against current manufacturer datasheets before use.
+The GUI can load a remote JSON database from a URL, making self-hosting straightforward:
+
+```sh
+cd data
+python3 -m http.server 8000
 ```
-P = P_ref * (1 + T * T_derate) * (1 - decay_rate) ^ years
+
+Then enter:
+
+```text
+http://127.0.0.1:8000/panels.json
 ```
 
-where `P` is the expected power output, `P_ref` is the reference power, `T` is the average
-temperature, `T_derate` is the temperature derating coefficient, `decay_rate` is the decay rate
-per year, and `years` is the number of years into the future. This is the standard PVWatts formula
-combined with an exponential decay rate formula. More complicated decay formulae exist and are
-more accurate, but this approximation is close enough for this project and much easier to
-implement.
+A database document has this shape:
 
-## Architecture
+```json
+{
+  "version": 1,
+  "panels": [
+    {
+      "manufacturer": "Example Solar",
+      "model": "Example 400 W",
+      "referencePower": 400.0,
+      "tempDeratingCoeffPwr": -0.0035,
+      "decayRate": 0.005
+    }
+  ]
+}
+```
 
-The program is organized into a few custom classes:
+For an installed application, the local database is searched in this order:
 
-- **`IOProcessor`** — the most complex class. It has functions for reading and writing CSV files,
-  plus helper functions for parsing strings and formatting output. It cleans up `main` and makes
-  file reading/writing easier.
-- **`FileIO`** — a simple wrapper around file streams for easier reading and writing of files.
-  `FileIO` and `IOProcessor` work closely together, but file stream handling is kept separate
-  from data processing.
-- **`Simulation`** — runs the equations that calculate the expected power output for each panel
-  over the specified number of years. It is deliberately separate from `Equation` so it can be
-  extended with more simulations in the future, with the necessary equations living in the
-  equation class. `Simulation` uses `Equation`, but is more complex.
-- **`Equation`** — static member functions implementing the expected-power-output equations based
-  on the PVWatts formula and the decay formula.
-- **`PanelData`** — a simple struct holding the specifications for each panel.
+1. The path in `PANEL_MODELER_PANEL_DB`
+2. `panels.json` next to the executable
+3. `<prefix>/share/panel-modeler/panels.json`
 
-`main.cpp` includes error handling and user interaction, including a help function that shows how
-to format the CSV for this program — useful for anyone running it without the author controlling
-how they use it.
+The GUI remembers the last remote database URL using `QSettings`.
 
-## Data Structures
+## Repository layout
 
-- A single array of `PanelData` structs holds the specifications for each panel.
-- A 2D array of doubles holds the expected power output for each panel over the specified number
-  of years. It is indexed by year and panel number, making it easy to access the expected power
-  output for any given year and panel — critical for the output file.
+```text
+src/core/    STL-only simulation and CSV code
+src/net/     Qt network services and panel database loading
+src/cli/     CSV and climate lookup command-line entry point
+src/gui/     Qt Widgets application and custom chart
+ data/       bundled panel database
+tests/       regression input, expected output, and test runner
+```
 
-Arrays are used instead of vectors because they are more efficient and the size of the data is
-known ahead of time (at runtime).
+The core library has no Qt dependency, so it can still be built and tested with
+`-Dqt=disabled`. The old raw arrays and heap-allocated streams were replaced with
+`std::vector` and RAII streams; `CsvIO` is now stateless and `Simulation::run` owns
+the common result-generation path used by both frontends.
 
-## File I/O
+## Tests
 
-File I/O is used to read the input file and write the output file. This lets users make small
-edits to files without having to input every parameter again by hand, and the output is easier to
-read and graph in Excel or a similar application.
+Run the Meson regression test:
 
-## Design Decisions (Differences from the Proposal)
+```sh
+meson test -C builddir
+```
 
-- The StandardFunctions library wasn't used because it's mostly for user inputs, and everything
-  in this project is done at the command line.
-- The number of years was not added to the `PanelData` struct — it's more realistic to have the
-  number of years be the same for all panels, and it made constructing the 2D array easier.
-- The `Equation` class differs from the proposal: it only has static member functions used by the
-  simulation class. Each panel only uses the equation class once, while the simulation class uses
-  it multiple times, so constructing objects per panel wasn't warranted. Standard test conditions
-  are built into the code at compile time (`constexpr`) because there are so few cases where
-  someone uses a different set of conditions that it didn't make sense to have them as variables.
-- The `IOProcessor` class has more functions than in the proposal because of helper functions
-  that weren't anticipated.
+It runs the CLI against `tests/ExamplePanelData.csv` and compares the output
+byte-for-byte with `tests/ExpectedOutputData.csv`.
 
-## Future Plans
+## Zed and clangd
 
-- A graphing feature would be nice, but was beyond the scope of this project.
-- Letting users input a location to pull irradiance and temperature data automatically would
-  require internet access, which wasn't implemented here.
+Meson generates `builddir/compile_commands.json`. The project includes
+[`.zed/settings.json`](.zed/settings.json), which tells Zed's clangd integration to
+use `builddir` as the compilation-database directory. Run Meson setup once before
+opening source files so the database exists:
 
-## Reflections
+```sh
+meson setup builddir --native-file clang.ini
+```
 
-C++ proved harder than expected. There were issues with deallocating pointers multiple times (in
-`main.cpp` and in a class destructor) that caused a fault, and getting the CSV formatting right
-took the longest time. Takeaways: file input and output can simultaneously make projects easier
-and more difficult; command-line arguments are useful (written before they were covered in
-class); and separating classes you might want to extend later is beneficial. In the future, more
-thought will go into planning — the UML diagram looks very different from the final code because
-the right home for some functionality wasn't clear up front.
+The repository also keeps an ignored root symlink named `compile_commands.json` for
+other clangd integrations and tools. Recreate it if the symlink is removed:
 
-## Resources
+```sh
+ln -sf builddir/compile_commands.json compile_commands.json
+```
 
-- PVWatts and decay formulae from a friend's dissertation:
-  https://repository.arizona.edu/handle/10150/677631
-- cplusplus.com for input stream information used to process the input CSV
+The optional infrastructure repository contains a rootless Podman service at
+`spruce-infra/panel-modeler/` that serves a self-hosted database internally at
+`http://panel-modeler-panels/panels.json`. The GUI can use that URL from the Panel
+Database dialog.

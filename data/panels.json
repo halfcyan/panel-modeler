@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "comment": "Nominal panel specifications for panel-modeler. Values are typical datasheet figures; verify against the manufacturer's datasheet before relying on them. Serve this file over HTTP (e.g. python3 -m http.server) to self-host a copy.",
+  "panels": [
+    { "manufacturer": "Generic", "model": "Residential Mono 400 W", "referencePower": 400.0, "tempDeratingCoeffPwr": -0.0035, "decayRate": 0.005 },
+    { "manufacturer": "Generic", "model": "Budget Poly 300 W", "referencePower": 300.0, "tempDeratingCoeffPwr": -0.0040, "decayRate": 0.0055 },
+    { "manufacturer": "Generic", "model": "Commercial 550 W", "referencePower": 550.0, "tempDeratingCoeffPwr": -0.0034, "decayRate": 0.005 },
+    { "manufacturer": "SunPower", "model": "Maxeon 6 440 W", "referencePower": 440.0, "tempDeratingCoeffPwr": -0.0027, "decayRate": 0.003 },
+    { "manufacturer": "REC", "model": "Alpha Pure-R 430 W", "referencePower": 430.0, "tempDeratingCoeffPwr": -0.0024, "decayRate": 0.004 },
+    { "manufacturer": "Panasonic", "model": "EverVolt 410 W", "referencePower": 410.0, "tempDeratingCoeffPwr": -0.0026, "decayRate": 0.005 },
+    { "manufacturer": "Qcells", "model": "Q.TRON G2 420 W", "referencePower": 420.0, "tempDeratingCoeffPwr": -0.003, "decayRate": 0.005 },
+    { "manufacturer": "Canadian Solar", "model": "TOPHiKu6 440 W", "referencePower": 440.0, "tempDeratingCoeffPwr": -0.0029, "decayRate": 0.005 },
+    { "manufacturer": "JA Solar", "model": "DeepBlue 4.0 435 W", "referencePower": 435.0, "tempDeratingCoeffPwr": -0.003, "decayRate": 0.0045 },
+    { "manufacturer": "Trina Solar", "model": "Vertex S+ 440 W", "referencePower": 440.0, "tempDeratingCoeffPwr": -0.003, "decayRate": 0.005 },
+    { "manufacturer": "JinkoSolar", "model": "Tiger Neo 440 W", "referencePower": 440.0, "tempDeratingCoeffPwr": -0.0029, "decayRate": 0.004 },
+    { "manufacturer": "LG", "model": "NeON 2 350 W", "referencePower": 350.0, "tempDeratingCoeffPwr": -0.0037, "decayRate": 0.005 }
+  ]
+}

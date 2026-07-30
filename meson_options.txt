@@ -1,0 +1,2 @@
+option('qt', type : 'feature', value : 'auto',
+       description : 'Use Qt6 to build the GUI and enable network climate/geocoding support in the CLI')
