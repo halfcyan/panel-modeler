@@ -374,7 +374,7 @@ namespace panel_modeler {
             return;
         }
 
-        const unsigned long years = static_cast<unsigned long>(m_yearsSpin->value());
+        const auto years = static_cast<unsigned long>(m_yearsSpin->value());
         m_results = Simulation::run(*panels, years);
 
         QStringList names;

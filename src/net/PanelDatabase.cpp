@@ -22,7 +22,7 @@ namespace panel_modeler {
         if (const QByteArray override = qgetenv("PANEL_MODELER_PANEL_DB"); !override.isEmpty()) {
             return QString::fromLocal8Bit(override);
         }
-        const QString besideExecutable = QCoreApplication::applicationDirPath() + QStringLiteral("/panels.json");
+        QString besideExecutable = QCoreApplication::applicationDirPath() + QStringLiteral("/panels.json");
         if (QFile::exists(besideExecutable)) {
             return besideExecutable;
         }
@@ -87,7 +87,7 @@ namespace panel_modeler {
 
         std::vector<PanelSpec> panels;
         panels.reserve(static_cast<std::size_t>(entries.size()));
-        for (const QJsonValue &entry: entries) {
+        for (const auto entry: entries) {
             const QJsonObject object = entry.toObject();
             PanelSpec spec;
             spec.manufacturer = object.value(QStringLiteral("manufacturer")).toString();

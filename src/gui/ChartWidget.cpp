@@ -5,6 +5,7 @@
 #include <QPainterPath>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 
 namespace panel_modeler {
@@ -12,11 +13,11 @@ namespace panel_modeler {
     namespace {
 
         // A matplotlib-tab10-inspired palette, cycled when there are more panels than colors
-        const QColor SERIES_COLORS[] = {
+        const std::array<QColor, 8> SERIES_COLORS = {
             QColor(31, 119, 180),  QColor(255, 127, 14), QColor(44, 160, 44),   QColor(214, 39, 40),
             QColor(148, 103, 189), QColor(140, 86, 75),  QColor(227, 119, 194), QColor(127, 127, 127),
         };
-        constexpr int NUM_SERIES_COLORS = sizeof(SERIES_COLORS) / sizeof(SERIES_COLORS[0]);
+        constexpr std::size_t NUM_SERIES_COLORS = SERIES_COLORS.size();
 
         constexpr double MARGIN_LEFT = 60.0;
         constexpr double MARGIN_RIGHT = 20.0;
@@ -88,9 +89,9 @@ namespace panel_modeler {
         const double yMax = niceCeiling(maxValue);
 
         const auto xForYear = [&](const std::size_t year) {
-            return MARGIN_LEFT + plotWidth * static_cast<double>(year) / static_cast<double>(maxYear);
+            return MARGIN_LEFT + (plotWidth * static_cast<double>(year) / static_cast<double>(maxYear));
         };
-        const auto yForValue = [&](const double value) { return MARGIN_TOP + plotHeight * (1.0 - value / yMax); };
+        const auto yForValue = [&](const double value) { return MARGIN_TOP + (plotHeight * (1.0 - (value / yMax))); };
 
         // gridlines + y tick labels (5 ticks from 0 to yMax)
         painter.setPen(palette().color(QPalette::Text));
@@ -114,7 +115,7 @@ namespace panel_modeler {
         painter.drawText(QRectF(MARGIN_LEFT, MARGIN_TOP + plotHeight + 24, plotWidth, 16), Qt::AlignHCenter,
                          QStringLiteral("Year"));
         painter.save();
-        painter.translate(14, MARGIN_TOP + plotHeight / 2);
+        painter.translate(14, MARGIN_TOP + (plotHeight / 2));
         painter.rotate(-90);
         painter.drawText(QRectF(-60, -8, 120, 16), Qt::AlignCenter, QStringLiteral("Expected power (W)"));
         painter.restore();
@@ -150,7 +151,7 @@ namespace panel_modeler {
             if (label.length() > 18) {
                 label = label.left(15) + QStringLiteral("...");
             }
-            const double labelWidth = static_cast<double>(metrics.horizontalAdvance(label));
+            const auto labelWidth = static_cast<double>(metrics.horizontalAdvance(label));
             legendX -= labelWidth;
             painter.setPen(palette().color(QPalette::Text));
             painter.drawText(QPointF(legendX, legendY + 10), label);

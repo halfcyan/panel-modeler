@@ -104,7 +104,8 @@ namespace {
     // Parses "lat,lon" from the given spec; returns false if it is not a coordinate pair.
     bool parseCoordinates(const std::string &spec, double &latitude, double &longitude) {
         std::stringstream stream(spec);
-        std::string latToken, lonToken;
+        std::string latToken;
+        std::string lonToken;
         if (!std::getline(stream, latToken, ',') || !std::getline(stream, lonToken)) {
             return false;
         }

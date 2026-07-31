@@ -9,8 +9,8 @@
 namespace panel_modeler {
 
     double Equation::PVWatts(const PanelData &input) {
-        return input.referencePower * (input.averageIrradiance / STD_IRRADIANCE) *
-            (1 + input.tempDeratingCoeffPwr * (input.averageTemp - STD_TEMP));
+        return (input.referencePower * (input.averageIrradiance / STD_IRRADIANCE)) *
+            (1 + (input.tempDeratingCoeffPwr * (input.averageTemp - STD_TEMP)));
     }
 
     double Equation::powerDecayPrediction(const PanelData &input, const unsigned long years) {

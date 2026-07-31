@@ -17,14 +17,14 @@ namespace panel_modeler {
 
     std::string CsvIO::trim(const std::string &s) {
         std::size_t start = 0;
-        while (start < s.size() && std::isspace(static_cast<unsigned char>(s[start]))) {
+        while (start < s.size() && std::isspace(static_cast<unsigned char>(s[start])) != 0) {
             ++start;
         }
         if (start == s.size()) {
             return {};
         }
         std::size_t end = s.size() - 1;
-        while (end > start && std::isspace(static_cast<unsigned char>(s[end]))) {
+        while (end > start && std::isspace(static_cast<unsigned char>(s[end])) != 0) {
             --end;
         }
         return s.substr(start, end - start + 1);

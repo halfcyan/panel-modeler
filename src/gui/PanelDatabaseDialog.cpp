@@ -132,11 +132,16 @@ namespace panel_modeler {
 
     void PanelDatabaseDialog::onAccept() {
         const int row = m_table->currentRow();
-        if (row < 0 || row >= static_cast<int>(m_panels.size())) {
+        if (row < 0) {
             QMessageBox::information(this, QStringLiteral("Panel Database"), QStringLiteral("Select a panel first."));
             return;
         }
-        m_selected = m_panels[static_cast<std::size_t>(row)];
+        const auto panelIndex = static_cast<std::size_t>(row);
+        if (panelIndex >= m_panels.size()) {
+            QMessageBox::information(this, QStringLiteral("Panel Database"), QStringLiteral("Select a panel first."));
+            return;
+        }
+        m_selected = m_panels[panelIndex];
         accept();
     }
 

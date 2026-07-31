@@ -1,0 +1,21 @@
+---
+Checks: >
+  -*,
+  bugprone-*,
+  performance-*,
+  modernize-avoid-c-arrays,
+  modernize-use-auto,
+  modernize-use-integer-sign-comparison,
+  performance-implicit-conversion-in-loop,
+  readability-avoid-const-params-in-decls,
+  readability-implicit-bool-conversion,
+  readability-isolate-declaration,
+  readability-math-missing-parentheses,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-exception-escape,
+  -modernize-use-trailing-return-type
+
+WarningsAsErrors: ''
+HeaderFilterRegex: 'src/.*'
+FormatStyle: file
+...
