@@ -75,6 +75,10 @@ The installed layout is approximately:
 <prefix>/share/doc/panel-modeler/LICENSE
 ```
 
+On Linux, Meson also installs a desktop launcher at
+`<prefix>/share/applications/panel-modeler.desktop`. It launches the Qt GUI from the
+application menu.
+
 To stage an install without modifying the system:
 
 ```sh

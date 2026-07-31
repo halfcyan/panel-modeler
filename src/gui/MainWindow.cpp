@@ -2,7 +2,8 @@
 
 #include <QDoubleSpinBox>
 #include <QFileDialog>
-#include <QFormLayout>
+
+#include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -53,7 +54,9 @@ namespace panel_modeler {
         resize(900, 720);
 
         // ---- location group ----
-        m_addressEdit->setPlaceholderText(QStringLiteral("e.g. Phoenix, AZ"));
+        m_addressEdit->setPlaceholderText(QStringLiteral("City, address, or place name (e.g. Phoenix, AZ)"));
+        m_statusLabel->setWordWrap(true);
+        m_statusLabel->setTextFormat(Qt::PlainText);
         m_latitudeSpin->setRange(-90.0, 90.0);
         m_latitudeSpin->setDecimals(6);
         m_latitudeSpin->setSingleStep(0.1);
@@ -66,30 +69,35 @@ namespace panel_modeler {
         m_temperatureSpin->setRange(CsvIO::MIN_TEMP, CsvIO::MAX_TEMP);
         m_temperatureSpin->setDecimals(2);
         m_temperatureSpin->setSuffix(QStringLiteral(" °C"));
+        m_latitudeSpin->setMinimumWidth(130);
+        m_longitudeSpin->setMinimumWidth(130);
+        m_irradianceSpin->setMinimumWidth(150);
+        m_temperatureSpin->setMinimumWidth(130);
 
-        auto *locationGrid = new QFormLayout;
-        auto *addressRow = new QHBoxLayout;
-        addressRow->addWidget(m_addressEdit, 1);
-        addressRow->addWidget(m_geocodeButton);
-        locationGrid->addRow(QStringLiteral("Address:"), addressRow);
+        auto *locationGrid = new QGridLayout;
+        locationGrid->setHorizontalSpacing(12);
+        locationGrid->setVerticalSpacing(8);
+        locationGrid->setColumnStretch(1, 1);
+        locationGrid->setColumnStretch(3, 1);
 
-        auto *coordinatesRow = new QHBoxLayout;
-        coordinatesRow->addWidget(m_latitudeSpin);
-        coordinatesRow->addWidget(new QLabel(QStringLiteral("Longitude:")));
-        coordinatesRow->addWidget(m_longitudeSpin);
-        coordinatesRow->addWidget(m_fetchClimateButton);
-        coordinatesRow->addStretch(1);
-        locationGrid->addRow(QStringLiteral("Latitude:"), coordinatesRow);
+        locationGrid->addWidget(new QLabel(QStringLiteral("Address or place:")), 0, 0);
+        locationGrid->addWidget(m_addressEdit, 0, 1, 1, 3);
+        locationGrid->addWidget(m_geocodeButton, 0, 4);
 
-        auto *climateRow = new QHBoxLayout;
-        climateRow->addWidget(m_irradianceSpin);
-        climateRow->addWidget(new QLabel(QStringLiteral("Temperature:")));
-        climateRow->addWidget(m_temperatureSpin);
-        climateRow->addStretch(1);
-        locationGrid->addRow(QStringLiteral("Irradiance:"), climateRow);
-        locationGrid->addRow(m_statusLabel);
+        locationGrid->addWidget(new QLabel(QStringLiteral("Latitude:")), 1, 0);
+        locationGrid->addWidget(m_latitudeSpin, 1, 1);
+        locationGrid->addWidget(new QLabel(QStringLiteral("Longitude:")), 1, 2);
+        locationGrid->addWidget(m_longitudeSpin, 1, 3);
+        locationGrid->addWidget(m_fetchClimateButton, 1, 4);
 
-        auto *locationGroup = new QGroupBox(QStringLiteral("Location && Climate"), this);
+        locationGrid->addWidget(new QLabel(QStringLiteral("Annual irradiance:")), 2, 0);
+        locationGrid->addWidget(m_irradianceSpin, 2, 1);
+        locationGrid->addWidget(new QLabel(QStringLiteral("Annual temperature:")), 2, 2);
+        locationGrid->addWidget(m_temperatureSpin, 2, 3);
+
+        locationGrid->addWidget(m_statusLabel, 3, 0, 1, 5);
+
+        auto *locationGroup = new QGroupBox(QStringLiteral("Site Location & Climate"), this);
         locationGroup->setLayout(locationGrid);
 
         // ---- panels group ----
@@ -149,7 +157,7 @@ namespace panel_modeler {
             fileMenu->addAction(QStringLiteral("&Export Results CSV..."), this, [this]() { exportResults(); });
         exportAction->setShortcut(QKeySequence::Save);
         fileMenu->addSeparator();
-        fileMenu->addAction(QStringLiteral("&Quit"), this, &QWidget::close, QKeySequence::Quit);
+        fileMenu->addAction(QStringLiteral("&Quit"), QKeySequence::Quit, this, &QWidget::close);
 
         QMenu *toolsMenu = menuBar()->addMenu(QStringLiteral("&Tools"));
         toolsMenu->addAction(QStringLiteral("Panel &Database..."), this, [this]() { openPanelDatabase(); });

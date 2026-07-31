@@ -57,6 +57,11 @@ install_data('data/panels.json',
 install_data(['README.md', 'LICENSE'],
              install_dir : join_paths(get_option('datadir'), 'doc', 'panel-modeler'))
 
+if host_machine.system() == 'linux'
+  install_data('data/panel-modeler.desktop',
+               install_dir : join_paths(get_option('datadir'), 'applications'))
+endif
+
 # Regression test: CLI output on the example input must match the expected CSV
 # byte-for-byte.
 python3 = find_program('python3', required : false)
