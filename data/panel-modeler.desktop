@@ -1,6 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=panel-modeler
+Icon=panel-modeler
 GenericName=Solar Panel Modeler
 Comment=Model photovoltaic panel output over time
 Exec=panel-modeler-gui

@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <component type="desktop-application">
   <id>dev.willowidk.panel-modeler</id>
   <name>panel-modeler</name>
   <summary>Model photovoltaic panel output over time</summary>
+  <icon type="stock">panel-modeler</icon>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
   <developer id="dev.willowidk">
@@ -38,7 +39,7 @@
   </keywords>
   <url type="homepage">https://tangled.org/willowidk.dev/panel-modeler</url>
   <url type="bugtracker">https://tangled.org/willowidk.dev/panel-modeler/issues</url>
-  <content_rating type="oars-1.1"/>
+  <content_rating type="oars-1.1" />
   <releases>
     <release version="2.0.0" date="2026-08-20">
       <description>

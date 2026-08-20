@@ -80,6 +80,7 @@ The installed layout is approximately:
 <prefix>/share/bash-completion/completions/panel-modeler.bash
 <prefix>/share/zsh/site-functions/_panel-modeler
 <prefix>/share/fish/vendor_completions.d/panel-modeler.fish
+<prefix>/share/icons/hicolor/scalable/apps/panel-modeler.svg
 <prefix>/share/doc/panel-modeler/README.md
 <prefix>/share/doc/panel-modeler/LICENSE
 ```
