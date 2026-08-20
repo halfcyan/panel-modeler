@@ -1,5 +1,5 @@
 project('panel-modeler', 'cpp',
-  version : '2.0.0',
+  version : '2.1.0',
   meson_version : '>=0.64.0',
   default_options : [
     'cpp_std=c++23',
@@ -54,6 +54,13 @@ subdir('src')
 
 install_data('data/panels.json',
              install_dir : join_paths(get_option('datadir'), 'panel-modeler'))
+
+install_data('data/completions/panel-modeler.bash',
+             install_dir : join_paths(get_option('datadir'), 'bash-completion', 'completions'))
+install_data('data/completions/_panel-modeler',
+             install_dir : join_paths(get_option('datadir'), 'zsh', 'site-functions'))
+install_data('data/completions/panel-modeler.fish',
+             install_dir : join_paths(get_option('datadir'), 'fish', 'vendor_completions.d'))
 install_data(['README.md', 'LICENSE'],
              install_dir : join_paths(get_option('datadir'), 'doc', 'panel-modeler'))
 

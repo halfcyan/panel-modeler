@@ -77,6 +77,9 @@ The installed layout is approximately:
 <prefix>/bin/panel-modeler
 <prefix>/bin/panel-modeler-gui
 <prefix>/share/panel-modeler/panels.json
+<prefix>/share/bash-completion/completions/panel-modeler.bash
+<prefix>/share/zsh/site-functions/_panel-modeler
+<prefix>/share/fish/vendor_completions.d/panel-modeler.fish
 <prefix>/share/doc/panel-modeler/README.md
 <prefix>/share/doc/panel-modeler/LICENSE
 ```
@@ -84,6 +87,11 @@ The installed layout is approximately:
 On Linux, Meson also installs a desktop launcher at
 `<prefix>/share/applications/panel-modeler.desktop`. It launches the Qt GUI from the
 application menu.
+
+Shell completions are installed for Bash, Zsh, and Fish. The installed files are
+picked up automatically by standard system-wide shell completion setups; for a custom
+prefix, add the corresponding completion directory under `<prefix>/share` to your
+shell's completion search path.
 
 To stage an install without modifying the system:
 

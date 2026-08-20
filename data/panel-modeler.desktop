@@ -5,6 +5,6 @@ GenericName=Solar Panel Modeler
 Comment=Model photovoltaic panel output over time
 Exec=panel-modeler-gui
 Terminal=false
-Categories=Science;Engineering;Utility;
+Categories=Science;
 Keywords=solar;photovoltaic;PV;irradiance;
 StartupNotify=true

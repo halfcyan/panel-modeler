@@ -1,0 +1,17 @@
+#compdef panel-modeler
+
+_panel_modeler() {
+    _arguments \
+        '1:input CSV:_files' \
+        '2:output CSV:_files' \
+        '(- 1 2):command:(--climate --version --help -h help)' \
+        '*::argument:->argument'
+
+    case "${words[2]}" in
+        --climate)
+            _message 'latitude,longitude or address'
+            ;;
+    esac
+}
+
+_panel_modeler "$@"
