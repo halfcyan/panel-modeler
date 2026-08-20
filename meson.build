@@ -54,7 +54,7 @@ subdir('src')
 
 install_data('data/panels.json',
              install_dir : join_paths(get_option('datadir'), 'panel-modeler'))
-install_data(['README.md', 'CHANGELOG.md', 'LICENSE'],
+install_data(['README.md', 'LICENSE'],
              install_dir : join_paths(get_option('datadir'), 'doc', 'panel-modeler'))
 
 if host_machine.system() == 'linux'
