@@ -12,7 +12,7 @@ namespace panel_modeler {
         /**
          * @brief combines the PVWatts equation with decay to find expected output
          * after a number of years
-         * @param input input panel data (individual panel, not an array)
+         * @param input panel data, including the number of identical panels in the array
          * @param year number of years into the future
          * @return expected output power after `year` years
          */

@@ -5,7 +5,8 @@
 namespace panel_modeler {
 
     double Simulation::decayPVWatts(const PanelData &input, const unsigned long year) {
-        return Equation::PVWatts(input) * Equation::powerDecayPrediction(input, year);
+        return static_cast<double>(input.panelCount) * Equation::PVWatts(input) *
+            Equation::powerDecayPrediction(input, year);
     }
 
     std::vector<std::vector<double>> Simulation::run(const std::vector<PanelData> &panels, const unsigned long years) {

@@ -23,6 +23,12 @@ On macOS with Homebrew:
 brew install meson ninja qt
 ```
 
+On Linux with Homebrew, install the required compiler and linker too:
+
+```sh
+brew install llvm mold meson ninja qt
+```
+
 Qt is optional at configure time. If it is not available, the CSV CLI and simulation
 core still build. To require or disable Qt explicitly, use `-Dqt=enabled` or
 `-Dqt=disabled`.
@@ -98,6 +104,7 @@ The GUI supports:
 - Address geocoding or direct latitude/longitude entry
 - Climate lookup and editable irradiance/temperature values
 - Adding panels manually or selecting them from the panel database
+- Setting the number of identical panels in each array
 - Importing the existing input CSV format
 - Running the simulation with a results table and line chart
 - Exporting results in the same CSV format as the CLI
@@ -135,30 +142,37 @@ retrieved from NASA POWER.
 ## Input CSV format
 
 The first line is the number of years to simulate. Each following non-empty line has
-five comma-separated values:
+five or six comma-separated values:
 
-1. Reference power in watts
+1. Reference power per panel in watts
 2. Average irradiance in watts per square meter
 3. Average temperature in degrees Celsius
-4. Temperature derating coefficient of power, as a decimal per degree Celsius
-5. Decay rate per year, as a decimal
+4. Temperature derating coefficient of power, as a decimal fraction per degree Celsius
+5. Decay rate per year, as a decimal fraction
+6. Number of identical panels in the array (optional; defaults to `1`)
 
 Example: [`tests/ExamplePanelData.csv`](tests/ExamplePanelData.csv)
 
 ```csv
 25
-400.0, 196.07, 13.5, -0.0035, 0.0045
+400.0, 196.07, 13.5, -0.0035, 0.0045, 12
 ```
 
-The parser limits years to 100, irradiance to 0–2000 W/m², temperature to -50–60 °C,
-temperature derating to -0.05–0.05, and decay to 0–0.10. Values outside those ranges
-are clamped with warnings.
+This describes an array of 12 identical 400 W panels. Existing five-value rows remain
+valid and represent a single panel.
+
+The percentage-style values are entered as decimal fractions, not whole percentages:
+`-0.0043` means `-0.43% per °C`, and `0.0045` means `0.45% per year`.
+The parser accepts arbitrary decimal precision. The parser limits years to 100, irradiance
+to 0–2000 W/m², temperature to -50–60 °C, temperature derating to -0.05–0.05, and decay
+to 0–0.10. Values outside those ranges are clamped with warnings.
 
 ## Output and equation
 
-Output contains one header row and one row for each year, starting at Year 0. The
-historical formatting is intentionally stable so existing spreadsheets and expected
-output files remain compatible.
+Output contains one header row and one row for each year, starting at Year 0. Each
+panel column represents the total output for that array, calculated as per-panel output
+multiplied by its panel count. The historical formatting is intentionally stable so
+existing spreadsheets and expected output files remain compatible.
 
 The estimate is:
 
@@ -171,8 +185,8 @@ where:
 - `P_ref` is reference panel power
 - `I` is average irradiance in W/m²
 - `T` is average temperature in °C
-- `c_T` is the temperature derating coefficient
-- `d` is the annual decay rate
+- `c_T` is the temperature derating coefficient as a decimal fraction (for example, `-0.0043` = `-0.43%/°C`)
+- `d` is the annual decay rate as a decimal fraction (for example, `0.0045` = `0.45%/year`)
 
 This is an intentionally simplified model, not a bankable production forecast.
 

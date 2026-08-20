@@ -13,11 +13,14 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QStyledItemDelegate>
 #include <QTabWidget>
 #include <QTableWidget>
 #include <QVBoxLayout>
 
+#include <cmath>
 #include <fstream>
+#include <limits>
 
 #include "config.h"
 #include "core/CsvIO.h"
@@ -35,7 +38,32 @@ namespace panel_modeler {
         constexpr int COLUMN_POWER = 1;
         constexpr int COLUMN_DERATE = 2;
         constexpr int COLUMN_DECAY = 3;
-        constexpr int NUM_PANEL_COLUMNS = 4;
+        constexpr int COLUMN_COUNT = 4;
+        constexpr int NUM_PANEL_COLUMNS = 5;
+
+        class PanelNumberDelegate final : public QStyledItemDelegate {
+        public:
+            explicit PanelNumberDelegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+
+            QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &,
+                                  const QModelIndex &index) const override {
+                auto *editor = new QDoubleSpinBox(parent);
+                editor->setDecimals(index.column() == COLUMN_POWER ? 2 : 6);
+                editor->setSingleStep(index.column() == COLUMN_POWER ? 1.0 : 0.0001);
+                if (index.column() == COLUMN_POWER) {
+                    editor->setRange(0.0, std::numeric_limits<double>::max());
+                } else if (index.column() == COLUMN_DERATE) {
+                    editor->setRange(CsvIO::MIN_DERATING_COEFF, CsvIO::MAX_DERATING_COEFF);
+                } else if (index.column() == COLUMN_DECAY) {
+                    editor->setRange(0.0, CsvIO::MAX_DECAY_RATE);
+                } else {
+                    editor->setDecimals(0);
+                    editor->setSingleStep(1.0);
+                    editor->setRange(1.0, CsvIO::MAX_PANEL_COUNT);
+                }
+                return editor;
+            }
+        };
     } // namespace
 
     MainWindow::MainWindow(QWidget *parent) :
@@ -102,7 +130,13 @@ namespace panel_modeler {
 
         // ---- panels group ----
         m_panelTable->setHorizontalHeaderLabels({QStringLiteral("Name"), QStringLiteral("Reference Power (W)"),
-                                                 QStringLiteral("Temp Derate (1/°C)"), QStringLiteral("Decay (1/yr)")});
+                                                 QStringLiteral("Temp Derate (decimal %/°C)"),
+                                                 QStringLiteral("Decay (decimal %/yr)"),
+                                                 QStringLiteral("Panels in Array")});
+        m_panelTable->setItemDelegateForColumn(COLUMN_POWER, new PanelNumberDelegate(m_panelTable));
+        m_panelTable->setItemDelegateForColumn(COLUMN_DERATE, new PanelNumberDelegate(m_panelTable));
+        m_panelTable->setItemDelegateForColumn(COLUMN_DECAY, new PanelNumberDelegate(m_panelTable));
+        m_panelTable->setItemDelegateForColumn(COLUMN_COUNT, new PanelNumberDelegate(m_panelTable));
         m_panelTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         m_panelTable->setSelectionBehavior(QAbstractItemView::SelectRows);
 
@@ -238,7 +272,7 @@ namespace panel_modeler {
     }
 
     void MainWindow::appendPanelRow(const QString &name, const double referencePower, const double deratingCoeff,
-                                    const double decayRate) {
+                                    const double decayRate, const unsigned int panelCount) {
         const int row = m_panelTable->rowCount();
         m_panelTable->insertRow(row);
         m_panelTable->setItem(row, COLUMN_NAME, new QTableWidgetItem(name));
@@ -251,6 +285,9 @@ namespace panel_modeler {
         auto *decayItem = new QTableWidgetItem;
         decayItem->setData(Qt::EditRole, decayRate);
         m_panelTable->setItem(row, COLUMN_DECAY, decayItem);
+        auto *countItem = new QTableWidgetItem;
+        countItem->setData(Qt::EditRole, static_cast<int>(panelCount));
+        m_panelTable->setItem(row, COLUMN_COUNT, countItem);
     }
 
     void MainWindow::removeSelectedPanels() {
@@ -281,7 +318,7 @@ namespace panel_modeler {
             return;
         }
         appendPanelRow(selected->displayName(), selected->referencePower, selected->tempDeratingCoeffPwr,
-                       selected->decayRate);
+                       selected->decayRate, 1U);
         setStatus(QStringLiteral("Added %1 from the panel database.").arg(selected->displayName()));
     }
 
@@ -311,7 +348,7 @@ namespace panel_modeler {
         for (std::size_t index = 0; index < input.panels.size(); ++index) {
             const PanelData &panel = input.panels[index];
             appendPanelRow(QStringLiteral("Panel %1").arg(index + 1), panel.referencePower, panel.tempDeratingCoeffPwr,
-                           panel.decayRate);
+                           panel.decayRate, panel.panelCount);
         }
         m_yearsSpin->setValue(static_cast<int>(input.years));
 
@@ -345,18 +382,22 @@ namespace panel_modeler {
             bool powerOk = false;
             bool derateOk = false;
             bool decayOk = false;
+            bool countOk = false;
             PanelData panel{};
             panel.averageIrradiance = m_irradianceSpin->value();
             panel.averageTemp = m_temperatureSpin->value();
             panel.referencePower = m_panelTable->item(row, COLUMN_POWER)->text().toDouble(&powerOk);
             panel.tempDeratingCoeffPwr = m_panelTable->item(row, COLUMN_DERATE)->text().toDouble(&derateOk);
             panel.decayRate = m_panelTable->item(row, COLUMN_DECAY)->text().toDouble(&decayOk);
-            if (!powerOk || !derateOk || !decayOk) {
+            const double countValue = m_panelTable->item(row, COLUMN_COUNT)->text().toDouble(&countOk);
+            if (!powerOk || !derateOk || !decayOk || !countOk || countValue < 1.0 ||
+                countValue > static_cast<double>(CsvIO::MAX_PANEL_COUNT) || std::floor(countValue) != countValue) {
                 const QString name = nameItem != nullptr ? nameItem->text() : QString::number(row + 1);
                 *error = QStringLiteral("Row %1 (\"%2\") has a non-numeric value.").arg(row + 1).arg(name);
                 m_panelTable->selectRow(row);
                 return std::nullopt;
             }
+            panel.panelCount = static_cast<unsigned int>(countValue);
             panels.push_back(panel);
         }
         if (panels.empty()) {

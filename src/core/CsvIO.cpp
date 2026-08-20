@@ -81,7 +81,8 @@ namespace panel_modeler {
         std::stringstream stream(line);
         std::string token;
 
-        // parse CSV tokens one by one and defensively convert to double;
+        // parse CSV tokens one by one; the optional sixth token is the array count.
+        // Numeric values accept arbitrary decimal precision;
         // a missing or unparseable token becomes 0.0 with a warning
         if (std::getline(stream, token, ',')) {
             panel.referencePower = parseDoubleSafe(trim(token), "referencePower", warnings);
@@ -107,6 +108,27 @@ namespace panel_modeler {
             panel.decayRate = parseDoubleSafe(trim(token), "decayRate", warnings);
         } else {
             panel.decayRate = 0.0;
+        }
+        if (std::getline(stream, token, ',')) {
+            const std::string countToken = trim(token);
+            try {
+                std::size_t consumed = 0;
+                const unsigned long parsed = std::stoul(countToken, &consumed);
+                if (consumed != countToken.size()) {
+                    throw std::invalid_argument("panelCount must be an integer");
+                }
+                if (parsed == 0UL) {
+                    report(warnings, "panelCount must be at least 1. Using 1.");
+                } else if (parsed > MAX_PANEL_COUNT) {
+                    report(warnings,
+                           "panelCount exceeds maximum allowed. Clamping to " + std::to_string(MAX_PANEL_COUNT) + ".");
+                    panel.panelCount = MAX_PANEL_COUNT;
+                } else {
+                    panel.panelCount = static_cast<unsigned int>(parsed);
+                }
+            } catch (const std::exception &) {
+                report(warnings, "could not parse '" + countToken + "' for panelCount. Using 1.");
+            }
         }
 
         // clamp every field to the limits in the header so absurd inputs cannot

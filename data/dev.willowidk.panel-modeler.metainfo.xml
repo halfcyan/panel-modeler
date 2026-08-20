@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>dev.willowidk.panel-modeler</id>
+  <name>panel-modeler</name>
+  <summary>Model photovoltaic panel output over time</summary>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <developer id="dev.willowidk">
+    <name>Cypress Reed</name>
+  </developer>
+  <description>
+    <p>
+      panel-modeler estimates photovoltaic panel or array output over time using a
+      PVWatts-style calculation and exponential degradation.
+    </p>
+    <p>
+      The desktop application provides editable climate and panel settings, simulation
+      results, charts, CSV import and export, and an optional panel database. It can
+      retrieve annual irradiance and temperature data from NASA POWER and geocode
+      addresses with OpenStreetMap Nominatim.
+    </p>
+  </description>
+  <launchable type="desktop-id">panel-modeler.desktop</launchable>
+  <provides>
+    <binary>panel-modeler-gui</binary>
+  </provides>
+  <categories>
+    <category>Science</category>
+    <category>Engineering</category>
+    <category>Utility</category>
+  </categories>
+  <keywords>
+    <keyword>solar</keyword>
+    <keyword>photovoltaic</keyword>
+    <keyword>PV</keyword>
+    <keyword>irradiance</keyword>
+    <keyword>energy</keyword>
+  </keywords>
+  <url type="homepage">https://tangled.org/willowidk.dev/panel-modeler</url>
+  <url type="bugtracker">https://tangled.org/willowidk.dev/panel-modeler/issues</url>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="2.0.0" date="2026-08-20">
+      <description>
+        <p>Initial GUI and networking release.</p>
+      </description>
+    </release>
+  </releases>
+</component>

@@ -42,10 +42,16 @@ namespace panel_modeler {
         auto *manager = new QNetworkAccessManager(this);
         QNetworkReply *reply = manager->get(nominatimRequest(buildUrl(address)));
         connect(reply, &QNetworkReply::finished, this, [this, reply, manager]() {
+            const QByteArray payload = reply->readAll();
+            const QString transportError = reply->error() != QNetworkReply::NoError ? reply->errorString() : QString();
             reply->deleteLater();
             manager->deleteLater();
+            if (!transportError.isEmpty()) {
+                emit failed(transportError);
+                return;
+            }
             QString error;
-            const auto coordinate = parseReply(reply->readAll(), &error);
+            const auto coordinate = parseReply(payload, &error);
             if (coordinate.has_value()) {
                 emit found(*coordinate);
             } else {
@@ -63,7 +69,14 @@ namespace panel_modeler {
         loop.exec();
 
         const QByteArray payload = reply->readAll();
+        const QString transportError = reply->error() != QNetworkReply::NoError ? reply->errorString() : QString();
         reply->deleteLater();
+        if (!transportError.isEmpty()) {
+            if (errorMessage != nullptr) {
+                *errorMessage = transportError;
+            }
+            return std::nullopt;
+        }
         return parseReply(payload, errorMessage);
     }
 

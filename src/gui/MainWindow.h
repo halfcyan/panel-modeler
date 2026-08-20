@@ -41,7 +41,8 @@ namespace panel_modeler {
         void removeSelectedPanels();
         void openPanelDatabase();
         void importCsv();
-        void appendPanelRow(const QString &name, double referencePower, double deratingCoeff, double decayRate);
+        void appendPanelRow(const QString &name, double referencePower, double deratingCoeff, double decayRate,
+                            unsigned int panelCount = 1U);
 
         // simulation
         void runSimulation();

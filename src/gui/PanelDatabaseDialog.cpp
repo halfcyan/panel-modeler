@@ -36,8 +36,8 @@ namespace panel_modeler {
         m_filterEdit->setPlaceholderText(QStringLiteral("Filter by manufacturer or model..."));
 
         m_table->setHorizontalHeaderLabels({QStringLiteral("Manufacturer"), QStringLiteral("Model"),
-                                            QStringLiteral("Power (W)"), QStringLiteral("Derate (1/°C)"),
-                                            QStringLiteral("Decay (1/yr)")});
+                                            QStringLiteral("Power (W)"), QStringLiteral("Derate (decimal %/°C)"),
+                                            QStringLiteral("Decay (decimal %/yr)")});
         m_table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         m_table->setSelectionBehavior(QAbstractItemView::SelectRows);
         m_table->setSelectionMode(QAbstractItemView::SingleSelection);

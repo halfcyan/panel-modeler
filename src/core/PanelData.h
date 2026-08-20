@@ -11,6 +11,7 @@ namespace panel_modeler {
         double averageTemp; // annual average temperature (°C)
         double tempDeratingCoeffPwr; // temperature derating coefficient of power (1/°C, typically negative)
         double decayRate; // fractional output loss per year (1/yr)
+        unsigned int panelCount = 1; // number of identical panels in the array
     };
 
 } // namespace panel_modeler

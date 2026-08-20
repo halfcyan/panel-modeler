@@ -56,6 +56,7 @@ namespace panel_modeler {
         static constexpr double MAX_DERATING_COEFF = 0.05;
         static constexpr double MIN_DERATING_COEFF = -0.05;
         static constexpr double MAX_DECAY_RATE = 0.10;
+        static constexpr unsigned int MAX_PANEL_COUNT = 10000U;
 
     private:
         static std::string trim(const std::string &s);

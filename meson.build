@@ -54,12 +54,14 @@ subdir('src')
 
 install_data('data/panels.json',
              install_dir : join_paths(get_option('datadir'), 'panel-modeler'))
-install_data(['README.md', 'LICENSE'],
+install_data(['README.md', 'CHANGELOG.md', 'LICENSE'],
              install_dir : join_paths(get_option('datadir'), 'doc', 'panel-modeler'))
 
 if host_machine.system() == 'linux'
   install_data('data/panel-modeler.desktop',
                install_dir : join_paths(get_option('datadir'), 'applications'))
+  install_data('data/dev.willowidk.panel-modeler.metainfo.xml',
+               install_dir : join_paths(get_option('datadir'), 'metainfo'))
 endif
 
 # Regression test: CLI output on the example input must match the expected CSV
@@ -73,6 +75,14 @@ if python3.found()
          cli_exe.full_path(),
          files('tests/ExamplePanelData.csv'),
          files('tests/ExpectedOutputData.csv'),
+       ])
+  test('cli-array-count',
+       python3,
+       args : [
+         files('tests/compare_output.py'),
+         cli_exe.full_path(),
+         files('tests/ArrayPanelData.csv'),
+         files('tests/ExpectedArrayOutputData.csv'),
        ])
 endif
 
