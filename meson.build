@@ -1,5 +1,5 @@
 project('panel-modeler', 'cpp',
-  version : '2.1.1',
+  version : '2.1.2',
   meson_version : '>=0.64.0',
   default_options : [
     'cpp_std=c++23',

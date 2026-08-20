@@ -3,7 +3,7 @@
   <id>dev.willowidk.panel-modeler</id>
   <name>panel-modeler</name>
   <summary>Model photovoltaic panel output over time</summary>
-  <icon type="stock">panel-modeler</icon>
+  <icon>panel-modeler</icon>
   <metadata_license>MIT</metadata_license>
   <project_license>MIT</project_license>
   <developer id="dev.willowidk">
